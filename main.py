@@ -7,34 +7,45 @@ class BreakoutGame:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Simple Breakout Game")
+        pygame.display.set_caption("Breakout Game")
         self.clock = pygame.time.Clock()
-        self.font_large = pygame.font.SysFont(None, FONT_SIZE_LARGE)
-        self.font_small = pygame.font.SysFont(None, FONT_SIZE_SMALL)
-        
-        # 状態管理
+        self.font_large = pygame.font.Font(None, 80)
+        self.font_small = pygame.font.Font(None, 40)
         self.state = "START"
         self.lives = LIVES
+        self.is_first_play = True  # 【追加】初回プレイかどうかを判定するフラグ
         self.reset_game()
 
     def reset_game(self):
-        """ゲームの初期化（ライフが減った時やリトライ時）"""
         self.all_sprites = pygame.sprite.Group()
         self.blocks = pygame.sprite.Group()
         self.paddle = Paddle()
         self.ball = Ball()
         self.all_sprites.add(self.paddle, self.ball)
-        self.create_blocks()
+        
+        # 【変更】初回なら固定、2回目以降ならランダムに作成
+        self.create_blocks(random_layout=not self.is_first_play)
 
-    def create_blocks(self):
-        for row in range(5):
-            for col in range(SCREEN_WIDTH // (BLOCK_WIDTH + 5)):
+    def create_blocks(self, random_layout=False):
+        import random
+        rows = 5
+        cols = SCREEN_WIDTH // (BLOCK_WIDTH + 5)
+        
+        for row in range(rows):
+            for col in range(cols):
+                # random_layout が True の場合、30%の確率でブロックを置かない（ランダム化）
+                if random_layout and random.random() < 0.3:
+                    continue
+                
                 block = Block(col * (BLOCK_WIDTH + 5) + 10, row * (BLOCK_HEIGHT + 5) + 50)
+                # ランダム時は色も変えると面白いです
+                if random_layout:
+                    block.image.fill((random.randint(100, 255), random.randint(100, 255), 0))
+                
                 self.blocks.add(block)
                 self.all_sprites.add(block)
 
     def draw_text(self, text, font, color, y_offset):
-        """画面に中央揃えでテキストを表示"""
         surf = font.render(text, True, color)
         rect = surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + y_offset))
         self.screen.blit(surf, rect)
@@ -51,8 +62,14 @@ class BreakoutGame:
                     if self.state == "START":
                         if event.key == pygame.K_SPACE:
                             self.state = "PLAYING"
-                    elif self.state == "GAMEOVER" or self.state == "CLEAR": # CLEARを追加
+                    elif self.state == "GAMEOVER":
                         if event.key == pygame.K_SPACE:
+                            self.lives = LIVES
+                            self.reset_game()
+                            self.state = "PLAYING"
+                    elif self.state == "CLEAR":
+                        if event.key == pygame.K_SPACE:
+                            self.is_first_play = False 
                             self.lives = LIVES
                             self.reset_game()
                             self.state = "PLAYING"
@@ -74,7 +91,7 @@ class BreakoutGame:
                 if hit_blocks:
                     self.ball.speed_y *= -1
 
-                # 【追加】クリア判定：ブロックグループが空になったかチェック
+                # クリア判定
                 if not self.blocks:
                     self.state = "CLEAR"
 
