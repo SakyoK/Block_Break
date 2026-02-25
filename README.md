@@ -19,6 +19,24 @@
 PygameのSpriteグループ機能を活用することで、当たり判定の処理を簡潔に記述している点も特徴の一つです。
 今後は、スコア機能の追加やステージの難易度設定、サウンドエフェクトの実装などを行い、よりゲームとしての完成度を高めていきたいと考えています。
 
+## 📸 Screenshots
+<table border="0">
+  <tr>
+    <td><img src="block1.png" width="300"></td>
+    <td><img src="block2.png" width="300"></td>
+  </tr>
+  <tr>
+    <td><img src="block3.png" width="300"></td>
+    <td><img src="block4.png" width="300"></td>
+  </tr>
+  <tr>
+    <td><img src="block5.png" width="300"></td>
+    <td></td>
+  </tr>
+</table>
+
+---
+
 ## 使用ライブラリ
 * pygame
 
